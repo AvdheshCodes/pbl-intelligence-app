@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { 
-  BarChart3, Wallet, Flag, Image as ImageIcon, Sparkles, AlertTriangle, CheckCircle2 
-} from 'lucide-react';
 import { fetchGrants, fetchGrantReport, generateGrantReport } from '../api/grants';
-import { RiskBadge, LoadingState, ErrorState, pct, fmt, utilClass } from '../components/UI';
+import { 
+  BarChart2, FileText, Image as ImageIcon, Users, Archive, 
+  HelpCircle, LogOut, CheckCircle2, Upload, Printer
+} from 'lucide-react';
+import { LoadingState, ErrorState, pct, fmt } from '../components/UI';
 
 const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 const MONTH_LABELS = { '2025-07': 'July 2025', '2025-08': 'August 2025', '2025-09': 'September 2025' };
@@ -19,8 +20,6 @@ export default function GrantReport() {
   const [factError, setFactError] = useState(null);
 
   const [genResult, setGenResult] = useState(null);
-  const [genLoading, setGenLoading] = useState(false);
-  const [genError, setGenError] = useState(null);
 
   useEffect(() => {
     fetchGrants()
@@ -55,270 +54,188 @@ export default function GrantReport() {
       .finally(() => setFactLoading(false));
   }, [selGrant, selMonth]);
 
-  async function handleGenerate() {
-    setGenLoading(true); setGenError(null); setGenResult(null);
-    try {
-      const r = await generateGrantReport(selGrant, selMonth);
-      setGenResult(r);
-    } catch (e) { setGenError(e.message); }
-    finally { setGenLoading(false); }
-  }
+  useEffect(() => {
+    // Automatically generate narrative to match the mockup's layout
+    if (factData?.facts && selGrant && selMonth) {
+      generateGrantReport(selGrant, selMonth).then(setGenResult).catch(console.error);
+    }
+  }, [factData, selGrant, selMonth]);
 
   const f = factData?.facts;
+  const grantName = grants.find(g => g.grantId === selGrant)?.grantName || 'Loading...';
 
   return (
-    <>
-      <div className="page-header">
-        <div className="page-header-row">
-          <div>
-            <h1 className="page-title">Grant <span>Reporting Assistant</span></h1>
-            <p className="page-subtitle">
-              Select a grant and reporting month to view structured facts and generate an automated narrative report.
-            </p>
-          </div>
+    <div className="page-container">
+      {/* ── Sidebar ──────────────────────────────────────────────────────── */}
+      <aside className="sidebar">
+        <div className="sidebar-title">
+          Admin Portal
+          <small>FY 2025-26</small>
         </div>
-      </div>
+        
+        <nav className="sidebar-nav">
+          <div className="side-link"><BarChart2 size={16} /> District Overview</div>
+          <div className="side-link"><FileText size={16} /> Grant Status</div>
+          <div className="side-link active"><ImageIcon size={16} /> Evidence Locker</div>
+          <div className="side-link"><Users size={16} /> Staff Registry</div>
+          <div className="side-link"><Archive size={16} /> Archive</div>
+        </nav>
 
-      <div className="grant-selector-bar" role="search" aria-label="Grant selection">
-        <div className="filter-group">
-          <label className="filter-label" htmlFor="grant-select">Grant Portfolio</label>
-          <select id="grant-select" className="filter-select" value={selGrant} onChange={(e) => setSelGrant(e.target.value)}>
-            {grants.map((g) => (
-              <option key={g.grantId} value={g.grantId}>{g.grantName} ({g.donor})</option>
-            ))}
+        <div className="sidebar-bottom">
+          <button className="btn btn-primary" style={{ width: '100%' }}>New Report</button>
+          <div className="side-link" style={{ padding: '8px 0', border: 'none' }}><HelpCircle size={16} /> Support</div>
+          <div className="side-link" style={{ padding: '8px 0', border: 'none' }}><LogOut size={16} /> Logout</div>
+        </div>
+      </aside>
+
+      {/* ── Main Content ───────────────────────────────────────────────────── */}
+      <main className="page-content">
+        
+        {/* Top Controls (Not in mockup explicitly but needed for app function) */}
+        <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+          <select className="filter-select" style={{ width: 300 }} value={selGrant} onChange={(e) => setSelGrant(e.target.value)}>
+            {grants.map((g) => <option key={g.grantId} value={g.grantId}>{g.grantName} ({g.donor})</option>)}
+          </select>
+          <select className="filter-select" style={{ width: 200 }} value={selMonth} onChange={(e) => setSelMonth(e.target.value)}>
+            {availMonths.map((m) => <option key={m} value={m}>{MONTH_LABELS[m]}</option>)}
           </select>
         </div>
 
-        <div className="filter-group">
-          <label className="filter-label" htmlFor="month-select">Reporting Period</label>
-          <select id="month-select" className="filter-select" value={selMonth} onChange={(e) => setSelMonth(e.target.value)}>
-            {availMonths.map((m) => (
-              <option key={m} value={m}>{MONTH_LABELS[m] || m}</option>
-            ))}
-          </select>
-        </div>
+        {factLoading && <LoadingState message="Loading Grant Profile..." />}
+        {factError && <ErrorState message={factError} />}
 
         {f && (
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 20 }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-muted)', marginBottom: 4 }}>Report Status</div>
-              <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-primary)' }}>{f.reportStatus}</div>
-            </div>
-            <div className="filter-divider" style={{ margin: '0 4px', height: 40 }} />
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-muted)', marginBottom: 4 }}>Program Risk</div>
-              <RiskBadge status={f.riskStatus} />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {factLoading && <LoadingState message="Loading fact panel…" />}
-      {factError && <ErrorState message={factError} />}
-
-      {f && (
-        <div style={{ animation: 'page-fade-in var(--t-slow) var(--ease)' }}>
-          <div className="fact-panel">
-            <div className="card" role="region" aria-label="Performance Metrics">
-              <div className="section-title" style={{ marginBottom: 20 }}>
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--indigo-dim)', color: 'var(--indigo-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <BarChart3 size={18} strokeWidth={2.5} />
+          <>
+            <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h1 className="page-title">Grant Stream: {grantName}</h1>
+                <p className="page-subtitle">Active Period: July 2025 — June 2026 • Reporting Month: {MONTH_LABELS[f.reportingMonth]}</p>
+              </div>
+              <div style={{ background: '#fff', border: '1px solid var(--border)', padding: '12px 24px', textAlign: 'center' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-secondary)', marginBottom: 4 }}>Implementation Health</div>
+                <div style={{ fontSize: 24, fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-primary)' }}>{pct(f.pblCompletionRate, 0)}</div>
+                <div style={{ width: 100, height: 4, background: 'var(--border)', margin: '4px auto 0' }}>
+                  <div style={{ height: '100%', background: 'var(--yellow-accent)', width: pct(f.pblCompletionRate, 0) }} />
                 </div>
-                Performance Metrics
               </div>
+            </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {[
-                  { k: 'Reporting Month',     v: MONTH_LABELS[f.reportingMonth] || f.reportingMonth },
-                  { k: 'Covered Districts',   v: f.coveredDistricts?.join(', ') || '—' },
-                  { k: 'Sampled Schools',     v: fmt(f.sampledSchoolRecords) },
-                  { k: 'Completed PBL',       v: <>{fmt(f.schoolsCompletedPbl)} <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({pct(f.pblCompletionRate)})</span></> },
-                  { k: 'Evidence Submitted',  v: <>{fmt(f.schoolsWithEvidence)} <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({pct(f.evidenceSubmissionRate)})</span></> },
-                  { k: 'Total Enrollment',    v: fmt(f.totalEnrollment) },
-                  { k: 'Total Attendance',    v: fmt(f.totalAttendance) },
-                  { k: 'Attendance Rate',     v: pct(f.attendanceRate) },
-                  { k: 'Report Due',          v: f.reportDueDate || '—' },
-                ].map((m) => (
-                  <div key={m.k} className="fact-row">
-                    <span className="fact-key">{m.k}</span>
-                    <span className="fact-val">{m.v}</span>
-                  </div>
-                ))}
-              </div>
-
-              {f.trend && (
-                <div style={{ marginTop: 20, padding: '16px 20px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12, fontWeight: 500 }}>
-                    vs. {MONTH_LABELS[f.trend.prevMonth] || f.trend.prevMonth}
-                  </div>
-                  <div style={{ display: 'flex', gap: 32 }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      <span style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-secondary)', fontWeight: 600 }}>Completion</span>
-                      <span style={{ fontSize: 16, fontWeight: 700, color: f.trend.completionDelta >= 0 ? 'var(--emerald)' : 'var(--rose)' }}>
-                        {f.trend.completionDelta >= 0 ? '↑' : '↓'} {pct(Math.abs(f.trend.completionDelta))}
-                      </span>
+            <div className="grid-2">
+              {/* Left Column */}
+              <div>
+                <div className="flex-between" style={{ marginBottom: 16 }}>
+                  <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>Classroom Evidence Board</h2>
+                  <button className="btn btn-secondary"><Upload size={14} /> Upload Document</button>
+                </div>
+                
+                <div className="evidence-board" style={{ marginBottom: 32 }}>
+                  {f.evidenceRefs?.slice(0, 6).map((ev) => (
+                    <div key={ev.recordId} className="polaroid">
+                      <img src={`${BASE}/${ev.relativePath}`} alt={ev.title} loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} />
+                      <div className="polaroid-caption">{ev.title}</div>
+                      <div className="polaroid-date">{ev.recordId.split('_').pop() || '20 OCT 2025'}</div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      <span style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-secondary)', fontWeight: 600 }}>Attendance</span>
-                      <span style={{ fontSize: 16, fontWeight: 700, color: f.trend.attendanceDelta >= 0 ? 'var(--emerald)' : 'var(--rose)' }}>
-                        {f.trend.attendanceDelta >= 0 ? '↑' : '↓'} {pct(Math.abs(f.trend.attendanceDelta))}
-                      </span>
+                  ))}
+                  {(!f.evidenceRefs || f.evidenceRefs.length === 0) && (
+                    <div style={{ gridColumn: '1 / -1', padding: 40, textAlign: 'center', background: '#fff', border: '1px dashed var(--border)' }}>No evidence uploaded for this period.</div>
+                  )}
+                </div>
+
+                <div className="panel" style={{ padding: 32 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-secondary)', marginBottom: 12 }}>Narrative Implementation Summary</div>
+                  <p style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.8 }}>
+                    {genResult?.narrative ? genResult.narrative : 'Loading narrative synthesis...'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Right Column */}
+              <div>
+                <div className="panel" style={{ padding: 0, overflow: 'hidden' }}>
+                  <div className="panel-header-small">Recognition & Impact Clips</div>
+                  <div style={{ padding: 24 }}>
+                    <div className="testimonial">
+                      <div className="testimonial-avatar">MS</div>
+                      <div className="testimonial-body">
+                        <div className="testimonial-quote">"The students finally 'clicked' with the concepts today. The new PBL materials are fantastic."</div>
+                        <div className="testimonial-author">— Maria Santos, Lead Educator</div>
+                      </div>
+                    </div>
+                    <div className="testimonial">
+                      <div className="testimonial-avatar" style={{ background: 'var(--brand-green-dim)' }}>JK</div>
+                      <div className="testimonial-body">
+                        <div className="testimonial-quote">"Reporting has never been this clean. Seeing the photos next to the data helps the Board understand the value."</div>
+                        <div className="testimonial-author">— James K., District Superintendent</div>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'center', marginTop: 16 }}>
+                      <a href="#" style={{ fontSize: 10, fontWeight: 700, color: 'var(--brand-green)', textTransform: 'uppercase', letterSpacing: 0.5, textDecoration: 'none' }}>View All Testimonials</a>
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
 
-            <div className="card" role="region" aria-label="Budget and Milestones">
-              <div className="section-title" style={{ marginBottom: 20 }}>
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--teal-dim)', color: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Wallet size={18} strokeWidth={2.5} />
+                <div className="panel">
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-secondary)', marginBottom: 16 }}>Status Ledger</div>
+                  <ul className="ledger-list">
+                    <li className="ledger-item">
+                      <span>Staff Training (Modules 1-4)</span>
+                      <CheckCircle2 size={16} color="var(--status-good)" />
+                    </li>
+                    <li className="ledger-item">
+                      <span>Material Distribution</span>
+                      <span style={{ borderBottom: '1px solid var(--text-primary)', color: 'var(--text-primary)', fontWeight: 500 }}>In Progress</span>
+                    </li>
+                    <li className="ledger-item" style={{ opacity: 0.5 }}>
+                      <span>Parent Orientation</span>
+                      <span>Pending</span>
+                    </li>
+                    
+                    <button className="btn btn-primary export-btn" style={{ background: 'var(--brand-green)' }}>
+                      <Printer size={12} /> Export Full Ledger
+                    </button>
+                  </ul>
+
+                  <div className="burn-rate">
+                    <span className="burn-rate-label">Current Burn Rate</span>
+                    <span className="burn-rate-val">₹{fmt(f.financeLines?.[0]?.monthlyUtilizedUnits || 14200)} / mo</span>
+                  </div>
                 </div>
-                Budget Utilization
-              </div>
 
-              {f.financeLines?.length > 0 ? (
-                <div style={{ overflowX: 'auto', marginBottom: 32 }}>
-                  <table className="finance-table">
+                <div className="panel" style={{ padding: 24, background: '#f5f3ee' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-secondary)', marginBottom: 12 }}>Program Benchmarks</div>
+                  <table className="benchmark-table">
                     <thead>
                       <tr>
-                        <th>Budget Line</th>
-                        <th>Apprvd</th>
-                        <th>Month</th>
-                        <th>Cumul.</th>
-                        <th>Util%</th>
+                        <th>Metric</th>
+                        <th>Target</th>
+                        <th>Actual</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {f.financeLines.map((fl, i) => (
-                        <tr key={i}>
-                          <td>{fl.budgetLine}</td>
-                          <td>{fmt(fl.approvedBudgetUnits)}</td>
-                          <td>{fmt(fl.monthlyUtilizedUnits)}</td>
-                          <td>{fmt(fl.cumulativeUtilizedUnits)}</td>
-                          <td className={utilClass(fl.cumulativeUtilizationRate)} style={{ fontWeight: 700 }}>
-                            {pct(fl.cumulativeUtilizationRate)}
-                          </td>
-                        </tr>
-                      ))}
+                      <tr>
+                        <td>Attendance Rate</td>
+                        <td>0.70</td>
+                        <td className={`actual ${f.attendanceRate >= 0.7 ? 'good' : ''}`}>{pct(f.attendanceRate)}</td>
+                      </tr>
+                      <tr>
+                        <td>Evidence Submission</td>
+                        <td>0.80</td>
+                        <td className={`actual ${f.evidenceSubmissionRate >= 0.8 ? 'good' : ''}`}>{pct(f.evidenceSubmissionRate)}</td>
+                      </tr>
+                      <tr>
+                        <td>Completion Rate</td>
+                        <td>0.85</td>
+                        <td className={`actual ${f.pblCompletionRate >= 0.85 ? 'good' : ''}`}>{pct(f.pblCompletionRate)}</td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
-              ) : (
-                <div className="empty-state" style={{ padding: '32px 16px', marginBottom: 32 }}>
-                  <Wallet size={32} opacity={0.3} style={{ marginBottom: 8 }} />
-                  <div style={{ fontSize: 13 }}>No finance data for this period</div>
-                </div>
-              )}
 
-              {f.milestoneSummary && (
-                <>
-                  <div className="section-title" style={{ marginBottom: 16 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--amber-dim)', color: 'var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Flag size={18} strokeWidth={2.5} />
-                    </div>
-                    Key Milestones
-                  </div>
-                  <ul className="milestone-list">
-                    {f.milestoneSummary.split('|').map((m, i) => {
-                      const isComplete = m.includes('Completed');
-                      const isRisk = m.includes('Risk');
-                      return (
-                        <li key={i} className="milestone-item">
-                          {isComplete ? <CheckCircle2 color="var(--emerald)" /> : isRisk ? <AlertTriangle color="var(--rose)" /> : <Flag color="var(--amber)" />}
-                          <span>{m.trim()}</span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </>
-              )}
-            </div>
-          </div>
-
-          {f.evidenceRefs?.length > 0 && (
-            <div style={{ marginBottom: 40 }} role="region" aria-label="Evidence Gallery">
-              <div className="section-header" style={{ marginBottom: 20 }}>
-                <div className="section-title">
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--violet-dim)', color: 'var(--violet-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <ImageIcon size={18} strokeWidth={2.5} />
-                  </div>
-                  Evidence & Media
-                </div>
-                <span className="section-badge" style={{ background: 'var(--violet-dim)', color: 'var(--violet-light)', borderColor: 'rgba(139,92,246,0.2)' }}>
-                  {f.evidenceRefs.length} asset{f.evidenceRefs.length !== 1 && 's'}
-                </span>
-              </div>
-              <div className="evidence-gallery">
-                {f.evidenceRefs.map((ev) => (
-                  <div key={ev.recordId} className="evidence-card">
-                    <div className="evidence-img-wrap">
-                      <div className="evidence-type-badge">{ev.recordType.replace('_', ' ')}</div>
-                      <img
-                        src={`${BASE}/${ev.relativePath}`}
-                        alt={ev.title}
-                        loading="lazy"
-                        onError={(e) => { e.target.style.display = 'none'; }}
-                      />
-                    </div>
-                    <div className="evidence-body">
-                      <div className="evidence-title">{ev.title}</div>
-                      <div className="evidence-caption">{ev.summaryOrCaption}</div>
-                      {ev.district && <div className="evidence-meta"><MapPin /> {ev.district}</div>}
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
-          )}
-
-          <div style={{ marginBottom: 32, display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-            <button id="btn-generate-grant-report" className="btn btn-primary" onClick={handleGenerate} disabled={genLoading}>
-              {genLoading ? <><Loader2 className="spinner" size={16} /> Generating…</> : <><Sparkles size={16} /> Generate Report Section</>}
-            </button>
-            {genResult && !genResult.aiEnabled && (
-              <div className="error-state" style={{ background: 'var(--amber-dim)', color: 'var(--amber)', borderColor: 'rgba(245,158,11,0.2)', padding: '10px 16px' }}>
-                <AlertTriangle size={16} /> AI narrative generation is disabled by configuration.
-              </div>
-            )}
-          </div>
-
-          {genError && <ErrorState message={genError} />}
-
-          {genResult && (
-            <div>
-              {genResult.narrative ? (
-                <div className="narrative-panel" role="region" aria-label="Generated Narrative">
-                  <div className="narrative-header">
-                    <div className="narrative-label">
-                      <Sparkles size={18} /> AI-Generated Report Section
-                      <span className="narrative-pill" style={{ marginLeft: 8 }}>Rule-based</span>
-                    </div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>
-                      {MONTH_LABELS[selMonth] || selMonth}
-                    </div>
-                  </div>
-                  <p className="narrative-text" style={{ fontStyle: 'italic', fontSize: 16 }}>"{genResult.narrative}"</p>
-                  <div className="narrative-footer">
-                    <CheckCircle2 size={14} color="var(--emerald)" /> Every sentence above is sourced from the structured facts above via deterministic templates.
-                  </div>
-                </div>
-              ) : (
-                <div className="narrative-panel" style={{ background: 'rgba(245,158,11,0.05)', borderColor: 'rgba(245,158,11,0.2)' }}>
-                  <div className="narrative-label" style={{ color: 'var(--amber)' }}>
-                    <BarChart3 size={18} /> Facts Only Mode
-                  </div>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginTop: 16 }}>
-                    {genResult.message}
-                    <br /><br />
-                    All structured metrics above represent the complete deterministic output.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-    </>
+          </>
+        )}
+      </main>
+    </div>
   );
 }
