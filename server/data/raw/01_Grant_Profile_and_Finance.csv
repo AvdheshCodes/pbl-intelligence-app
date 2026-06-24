@@ -1,0 +1,46 @@
+grant_id,donor,grant_name,period_start,period_end,covered_districts,reporting_month,budget_line,approved_budget_units,monthly_utilized_units,cumulative_utilized_units,cumulative_utilization_rate,finance_note
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-07,Facilitator orientation,136,42,42,0.3085,Within plan
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-07,Learning material kits,102,31,31,0.3074,Within plan
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-07,Field mentoring visits,76,23,23,0.3029,Within plan
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-07,Monitoring and reporting,60,19,19,0.3253,Within plan
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-07,Program coordination,51,15,15,0.3027,Within plan
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-08,Facilitator orientation,136,37,79,0.5837,Within plan
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-08,Learning material kits,102,28,59,0.5800,Within plan
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-08,Field mentoring visits,76,20,43,0.5660,Within plan
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-08,Monitoring and reporting,60,15,35,0.5813,Within plan
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-08,Program coordination,51,14,29,0.5690,Within plan
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-09,Facilitator orientation,136,31,110,0.8125,Within plan
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-09,Learning material kits,102,23,82,0.8037,Within plan
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-09,Field mentoring visits,76,17,60,0.7887,Within plan
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-09,Monitoring and reporting,60,14,48,0.8096,Within plan
+GRANT_AA_2025,Donor AA,Learning Support Grant AA,2025-07-01,2025-09-30,District T; District G; District AK; District S,2025-09,Program coordination,51,11,41,0.7944,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-07,Facilitator orientation,115,38,38,0.3273,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-07,Learning material kits,86,26,26,0.2988,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-07,Field mentoring visits,65,21,21,0.3212,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-07,Monitoring and reporting,50,16,16,0.3169,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-07,Program coordination,43,14,14,0.3162,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-08,Facilitator orientation,115,31,68,0.5932,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-08,Learning material kits,86,23,49,0.5646,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-08,Field mentoring visits,65,18,39,0.6065,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-08,Monitoring and reporting,50,14,30,0.5890,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-08,Program coordination,43,12,26,0.6009,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-09,Facilitator orientation,115,24,93,0.8053,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-09,Learning material kits,86,18,67,0.7733,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-09,Field mentoring visits,65,15,54,0.8371,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-09,Monitoring and reporting,50,11,41,0.8147,Within plan
+GRANT_BB_2025,Donor BB,Learning Support Grant BB,2025-07-01,2025-09-30,District K; District AB; District O; District L,2025-09,Program coordination,43,10,36,0.8264,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-07,Facilitator orientation,101,31,31,0.3040,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-07,Learning material kits,76,24,24,0.3187,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-07,Field mentoring visits,57,17,17,0.2981,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-07,Monitoring and reporting,44,14,14,0.3115,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-07,Program coordination,38,12,12,0.3214,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-08,Facilitator orientation,101,26,57,0.5650,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-08,Learning material kits,76,21,45,0.5906,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-08,Field mentoring visits,57,15,32,0.5643,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-08,Monitoring and reporting,44,12,25,0.5749,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-08,Program coordination,38,11,23,0.6040,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-09,Facilitator orientation,101,21,78,0.7747,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-09,Learning material kits,76,17,62,0.8204,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-09,Field mentoring visits,57,13,45,0.7914,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-09,Monitoring and reporting,44,9,35,0.7883,Within plan
+GRANT_CC_2025,Donor CC,Learning Support Grant CC,2025-07-01,2025-09-30,District J; District E; District I; District F,2025-09,Program coordination,38,8,31,0.8143,Within plan

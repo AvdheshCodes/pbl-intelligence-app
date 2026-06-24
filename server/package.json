@@ -1,0 +1,19 @@
+{
+  "name": "pbl-intelligence-server",
+  "version": "1.0.0",
+  "description": "PBL Program Intelligence & Grant Reporting Assistant — backend",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "start": "node server.js",
+    "seed": "node src/scripts/seedData.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "csv-parse": "^5.5.6",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.5.1"
+  }
+}
