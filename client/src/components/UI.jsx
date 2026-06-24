@@ -1,18 +1,20 @@
+import { 
+  CheckCircle2, AlertTriangle, AlertCircle, XCircle, 
+  TrendingUp, TrendingDown, Minus, Loader2, AlertOctagon 
+} from 'lucide-react';
+
 // ── Formatters ────────────────────────────────────────────────────────────────
 
-/** Format a 0.0–1.0 rate as "72.3%" */
 export function pct(rate, d = 1) {
   if (rate == null || isNaN(rate)) return '—';
   return `${(Number(rate) * 100).toFixed(d)}%`;
 }
 
-/** Format a number with Indian locale commas */
 export function fmt(n) {
   if (n == null || n === '') return '—';
   return Number(n).toLocaleString('en-IN');
 }
 
-/** CSS variable string for a risk status */
 export function getRiskColor(status) {
   return {
     'On Track': 'var(--risk-on-track)',
@@ -22,7 +24,6 @@ export function getRiskColor(status) {
   }[status] || 'var(--text-muted)';
 }
 
-/** Utility-rate colour class */
 export function utilClass(rate) {
   if (rate >= 0.7) return 'util-good';
   if (rate >= 0.4) return 'util-warn';
@@ -32,26 +33,27 @@ export function utilClass(rate) {
 // ── Risk Badge ─────────────────────────────────────────────────────────────────
 
 const RISK_CFG = {
-  'On Track': { cls: 'on-track', dot: '●' },
-  'Behind':   { cls: 'behind',   dot: '◆' },
-  'At Risk':  { cls: 'at-risk',  dot: '▲' },
-  'Critical': { cls: 'critical', dot: '✕' },
+  'On Track': { cls: 'on-track', Icon: CheckCircle2 },
+  'Behind':   { cls: 'behind',   Icon: AlertTriangle },
+  'At Risk':  { cls: 'at-risk',  Icon: AlertCircle },
+  'Critical': { cls: 'critical', Icon: XCircle },
 };
 
 export function RiskBadge({ status, title }) {
-  const cfg = RISK_CFG[status] || { cls: 'critical', dot: '?' };
+  const cfg = RISK_CFG[status] || { cls: 'critical', Icon: XCircle };
+  const Icon = cfg.Icon;
   return (
     <span className={`risk-badge ${cfg.cls}`} title={title} aria-label={`Risk: ${status}`}>
-      {cfg.dot} {status}
+      <Icon size={14} strokeWidth={2.5} /> {status}
     </span>
   );
 }
 
 // ── KPI Card ───────────────────────────────────────────────────────────────────
 
-export function KpiCard({ label, value, sub, icon, trend, accentColor, iconBg, glowColor, id }) {
+export function KpiCard({ label, value, sub, Icon, trend, accentColor, iconBg, glowColor, id }) {
   const trendClass = trend > 0 ? 'up' : trend < 0 ? 'down' : 'neutral';
-  const trendIcon  = trend > 0 ? '↑' : trend < 0 ? '↓' : '→';
+  const TrendIcon  = trend > 0 ? TrendingUp : trend < 0 ? TrendingDown : Minus;
 
   return (
     <div
@@ -64,11 +66,12 @@ export function KpiCard({ label, value, sub, icon, trend, accentColor, iconBg, g
     >
       <div className="kpi-icon-wrap">
         <div className="kpi-icon" style={{ background: iconBg || 'var(--indigo-dim)' }}>
-          {icon}
+          <Icon size={20} strokeWidth={2.5} />
         </div>
         {trend !== undefined && trend !== null && (
           <span className={`kpi-trend ${trendClass}`}>
-            {trendIcon} {Math.abs(trend * 100).toFixed(1)}pp
+            <TrendIcon size={14} strokeWidth={2.5} /> 
+            {Math.abs(trend * 100).toFixed(1)}pp
           </span>
         )}
       </div>
@@ -96,10 +99,18 @@ export function RiskDist({ d }) {
   const { onTrack = 0, behind = 0, atRisk = 0, critical = 0 } = d || {};
   return (
     <div className="risk-dist" aria-label="Risk distribution">
-      <span style={{ color: 'var(--risk-on-track)' }} title={`On Track: ${onTrack}`}>● {onTrack}</span>
-      <span style={{ color: 'var(--risk-behind)'   }} title={`Behind: ${behind}`}>◆ {behind}</span>
-      <span style={{ color: 'var(--risk-at-risk)'  }} title={`At Risk: ${atRisk}`}>▲ {atRisk}</span>
-      <span style={{ color: 'var(--risk-critical)' }} title={`Critical: ${critical}`}>✕ {critical}</span>
+      <span style={{ color: 'var(--risk-on-track)' }} title={`On Track: ${onTrack}`}>
+        <CheckCircle2 size={12} strokeWidth={2.5} /> {onTrack}
+      </span>
+      <span style={{ color: 'var(--risk-behind)'   }} title={`Behind: ${behind}`}>
+        <AlertTriangle size={12} strokeWidth={2.5} /> {behind}
+      </span>
+      <span style={{ color: 'var(--risk-at-risk)'  }} title={`At Risk: ${atRisk}`}>
+        <AlertCircle size={12} strokeWidth={2.5} /> {atRisk}
+      </span>
+      <span style={{ color: 'var(--risk-critical)' }} title={`Critical: ${critical}`}>
+        <XCircle size={12} strokeWidth={2.5} /> {critical}
+      </span>
     </div>
   );
 }
@@ -109,8 +120,8 @@ export function RiskDist({ d }) {
 export function LoadingState({ message = 'Loading…' }) {
   return (
     <div className="loading-state" role="status" aria-live="polite">
-      <div className="spinner" style={{ color: 'var(--indigo-light)' }} />
-      <span>{message}</span>
+      <Loader2 size={32} className="spinner" style={{ color: 'var(--indigo-light)' }} />
+      <span style={{ fontWeight: 500 }}>{message}</span>
     </div>
   );
 }
@@ -118,7 +129,7 @@ export function LoadingState({ message = 'Loading…' }) {
 export function ErrorState({ message }) {
   return (
     <div className="error-state" role="alert">
-      <span aria-hidden="true">⚠</span>
+      <AlertOctagon size={18} strokeWidth={2.5} />
       <span>{message}</span>
     </div>
   );

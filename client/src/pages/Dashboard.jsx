@@ -1,8 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell,
 } from 'recharts';
+import { 
+  Building2, CheckCircle2, Paperclip, Users, Calendar, 
+  TrendingUp, PauseCircle, MapPin, Sparkles, X, ChevronUp, ChevronDown 
+} from 'lucide-react';
 import { fetchDashboard, fetchFilters, fetchGeographies } from '../api/dashboard';
 import { generateProgramReport } from '../api/grants';
 import {
@@ -18,12 +22,12 @@ function ChartTip({ active, payload, label }) {
   return (
     <div style={{
       background: 'var(--bg-elevated)', border: '1px solid var(--border)',
-      borderRadius: 10, padding: '10px 14px', fontSize: 12, minWidth: 120,
-      boxShadow: 'var(--shadow-md)',
+      borderRadius: 12, padding: '12px 16px', fontSize: 13, minWidth: 140,
+      boxShadow: 'var(--shadow-md)', color: 'var(--text-primary)'
     }}>
-      <div style={{ fontWeight: 700, marginBottom: 6, color: 'var(--text-primary)', fontSize: 11 }}>{label}</div>
+      <div style={{ fontWeight: 600, marginBottom: 8, color: 'var(--text-secondary)', fontSize: 12 }}>{label}</div>
       {payload.map((p) => (
-        <div key={p.name} style={{ color: p.color, marginTop: 2, display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+        <div key={p.name} style={{ color: p.color, marginTop: 4, display: 'flex', justifyContent: 'space-between', gap: 16 }}>
           <span>{p.name}</span>
           <span style={{ fontWeight: 700 }}>
             {typeof p.value === 'number' && p.value <= 1 ? pct(p.value) : p.value}
@@ -73,14 +77,12 @@ export default function Dashboard() {
   const [progError, setProgError]       = useState(null);
   const [progOpen, setProgOpen]         = useState(false);
 
-  // Load filter dropdowns (blocks depend on selected district)
   useEffect(() => {
     fetchFilters(filters.district !== 'All' ? filters.district : '')
       .then((d) => setFilterOpts((prev) => ({ ...prev, ...d })))
       .catch(console.error);
   }, [filters.district]);
 
-  // Reload data whenever filters change
   const params = buildParams(filters);
   useEffect(() => {
     setDashLoading(true); setError(null); setGeoLoading(true);
@@ -145,22 +147,22 @@ export default function Dashboard() {
     : null;
 
   const riskBarData = RISK_BAR.map((r) => ({ ...r, value: kpis?.riskDistribution?.[r.key] ?? 0 }));
-  const sortIcon = (k) => sortKey === k ? (sortDir === 'asc' ? ' ↑' : ' ↓') : '';
+  
+  const sortIcon = (k) => {
+    if (sortKey !== k) return null;
+    return sortDir === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />;
+  };
 
-  /* active filter summary */
   const activeFilterCount = Object.entries(filters).filter(([k, v]) =>
     k !== 'month' && (Array.isArray(v) ? v.length > 0 : v !== 'All')
   ).length + (filters.month !== 'All' ? 1 : 0);
 
   return (
     <>
-      {/* ── Page Header ───────────────────────────────────────────────── */}
       <div className="page-header">
         <div className="page-header-row">
           <div>
-            <h1 className="page-title">
-              Program <span>Review Dashboard</span>
-            </h1>
+            <h1 className="page-title">Program <span>Review Dashboard</span></h1>
             <p className="page-subtitle">
               School-level PBL performance · July–September 2025
               {kpis && ` · ${fmt(kpis.totalSchools)} schools in current view`}
@@ -170,7 +172,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Filters ───────────────────────────────────────────────────── */}
       <div className="filter-bar" role="search" aria-label="Dashboard filters">
         <div className="filter-group">
           <label className="filter-label" htmlFor="filter-month">Month</label>
@@ -232,12 +233,11 @@ export default function Dashboard() {
 
         {activeFilterCount > 0 && (
           <button id="reset-filters" className="btn-reset" onClick={resetFilters} aria-label="Reset all filters">
-            ✕ Reset
+            <X size={14} /> Reset
           </button>
         )}
       </div>
 
-      {/* ── KPI Cards ─────────────────────────────────────────────────── */}
       {dashLoading
         ? <LoadingState message="Computing program metrics…" />
         : error
@@ -246,121 +246,115 @@ export default function Dashboard() {
         <div className="kpi-grid" role="region" aria-label="Key performance indicators">
           <KpiCard id="kpi-total-schools"
             label="Total Schools" value={fmt(kpis.totalSchools)}
-            icon="🏫" accentColor="var(--indigo)" iconBg="var(--indigo-dim)"
+            Icon={Building2} accentColor="var(--indigo)" iconBg="var(--indigo-dim)"
           />
           <KpiCard id="kpi-participating"
             label="Participating Schools" value={fmt(kpis.participatingSchools)}
             sub={`${pct(kpis.participationRate)} of all schools`}
-            icon="✅" accentColor="var(--emerald)" iconBg="var(--emerald-dim)"
+            Icon={CheckCircle2} accentColor="var(--emerald)" iconBg="var(--emerald-dim)"
             glowColor="rgba(16,185,129,0.15)"
             trend={trend && !trend.type ? trend.participationDelta : null}
           />
           <KpiCard id="kpi-evidence"
             label="Evidence Submissions" value={fmt(kpis.evidenceSubmissions)}
             sub={`${pct(kpis.evidenceRate)} of participants`}
-            icon="📎" accentColor="var(--teal)" iconBg="var(--teal-dim)"
+            Icon={Paperclip} accentColor="var(--teal)" iconBg="var(--teal-dim)"
           />
           <KpiCard id="kpi-enrollment"
             label="Total Enrollment" value={fmt(kpis.totalEnrollment)}
-            sub="all filtered schools" icon="👨‍🎓"
+            sub="all filtered schools" Icon={Users}
             accentColor="var(--violet)" iconBg="var(--violet-dim)"
           />
           <KpiCard id="kpi-attendance-sessions"
             label="Total Attendance Sessions" value={fmt(kpis.totalAttendance)}
-            sub="Math + Science sessions combined" icon="📅"
+            sub="Math + Science sessions combined" Icon={Calendar}
             accentColor="var(--indigo)" iconBg="var(--indigo-dim)"
           />
           <KpiCard id="kpi-attendance-rate"
             label="Attendance Rate" value={pct(kpis.attendanceRateAmongParticipants)}
             sub="avg among participating schools only"
-            icon="📈" accentColor="var(--teal)" iconBg="var(--teal-dim)"
+            Icon={TrendingUp} accentColor="var(--teal)" iconBg="var(--teal-dim)"
             glowColor="rgba(20,184,166,0.15)"
             trend={trend && !trend.type ? trend.attendanceDelta : null}
           />
           <KpiCard id="kpi-non-participants"
             label="Non-Participants" value={fmt(kpis.totalSchools - kpis.participatingSchools)}
             sub="schools that skipped this month"
-            icon="⏸" accentColor="var(--amber)" iconBg="var(--amber-dim)"
+            Icon={PauseCircle} accentColor="var(--amber)" iconBg="var(--amber-dim)"
             glowColor="rgba(245,158,11,0.15)"
           />
         </div>
       )}
 
-      {/* ── Charts row ────────────────────────────────────────────────── */}
       {!dashLoading && kpis && (
         <div className="dashboard-grid">
-          {/* Risk distribution */}
           <div className="chart-card" role="region" aria-label="Risk distribution chart">
             <div className="section-header">
               <div className="section-title">Risk Distribution</div>
               <span className="section-badge">{fmt(kpis.totalSchools)} schools</span>
             </div>
-            <ResponsiveContainer width="100%" height={190}>
-              <BarChart data={riskBarData} barCategoryGap="35%" margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11, fontWeight: 500 }}
-                  axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={false} tickLine={false} />
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={riskBarData} barCategoryGap="30%" margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} dy={10} />
+                <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip content={<ChartTip />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
-                <Bar dataKey="value" radius={[5,5,0,0]}>
-                  {riskBarData.map((e, i) => <Cell key={i} fill={e.fill} fillOpacity={0.85} />)}
+                <Bar dataKey="value" radius={[6,6,0,0]}>
+                  {riskBarData.map((e, i) => <Cell key={i} fill={e.fill} fillOpacity={0.9} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-            <div style={{ display: 'flex', gap: 14, marginTop: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 16, marginTop: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
               {riskBarData.map((r) => (
-                <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--text-secondary)' }}>
-                  <span style={{ width: 8, height: 8, borderRadius: 2, background: r.fill, display: 'inline-block', flexShrink: 0 }} />
+                <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)' }}>
+                  <span style={{ width: 10, height: 10, borderRadius: 3, background: r.fill, display: 'inline-block', flexShrink: 0 }} />
                   {r.name}: <strong style={{ color: r.fill }}>{r.value}</strong>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Trend line */}
           <div className="chart-card" role="region" aria-label="Trend chart">
-            <div className="section-title" style={{ marginBottom: 14 }}>3-Month Trend</div>
+            <div className="section-title" style={{ marginBottom: 20 }}>3-Month Trend</div>
             {trendSeries ? (
-              <ResponsiveContainer width="100%" height={190}>
-                <LineChart data={trendSeries} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                  <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <YAxis tickFormatter={(v) => `${(v*100).toFixed(0)}%`} tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={false} tickLine={false} domain={[0,1]} />
+              <ResponsiveContainer width="100%" height={220}>
+                <LineChart data={trendSeries} margin={{ top: 10, right: 10, left: -24, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                  <XAxis dataKey="month" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} axisLine={false} tickLine={false} dy={10} />
+                  <YAxis tickFormatter={(v) => `${(v*100).toFixed(0)}%`} tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} domain={[0,1]} />
                   <Tooltip content={<ChartTip />} />
-                  <Legend wrapperStyle={{ fontSize: 11, color: 'var(--text-secondary)', paddingTop: 8 }} />
-                  <Line type="monotone" dataKey="Participation" stroke="#818cf8" strokeWidth={2.5}
-                    dot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#818cf8' }}
-                    activeDot={{ r: 6 }} />
-                  <Line type="monotone" dataKey="Attendance" stroke="#14b8a6" strokeWidth={2.5}
-                    dot={{ r: 4, fill: '#0d9488', strokeWidth: 2, stroke: '#14b8a6' }}
-                    activeDot={{ r: 6 }} />
+                  <Legend wrapperStyle={{ fontSize: 12, color: 'var(--text-secondary)', paddingTop: 16 }} iconType="circle" />
+                  <Line type="monotone" dataKey="Participation" stroke="#818cf8" strokeWidth={3}
+                    dot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#18181b' }} activeDot={{ r: 6, strokeWidth: 0 }} />
+                  <Line type="monotone" dataKey="Attendance" stroke="#14b8a6" strokeWidth={3}
+                    dot={{ r: 4, fill: '#0d9488', strokeWidth: 2, stroke: '#18181b' }} activeDot={{ r: 6, strokeWidth: 0 }} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div style={{ height: 190, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 8, color: 'var(--text-muted)' }}>
+              <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, color: 'var(--text-muted)' }}>
                 {trend && !trend.type ? (
-                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', textAlign: 'center', padding: '0 12px' }}>
-                    <div style={{ marginBottom: 6, color: 'var(--text-muted)', fontSize: 11 }}>vs. {MONTH_LABELS[trend.prevMonth] || trend.prevMonth}</div>
-                    <div style={{ display: 'flex', gap: 20, justifyContent: 'center' }}>
+                  <div style={{ fontSize: 13, color: 'var(--text-secondary)', textAlign: 'center', padding: '0 16px' }}>
+                    <div style={{ marginBottom: 12, color: 'var(--text-muted)', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>vs. {MONTH_LABELS[trend.prevMonth] || trend.prevMonth}</div>
+                    <div style={{ display: 'flex', gap: 32, justifyContent: 'center' }}>
                       <div>
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>Participation</div>
-                        <div style={{ fontSize: 20, fontWeight: 800, color: trend.participationDelta >= 0 ? 'var(--emerald)' : 'var(--rose)' }}>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Participation</div>
+                        <div style={{ fontSize: 24, fontWeight: 800, color: trend.participationDelta >= 0 ? 'var(--emerald)' : 'var(--rose)' }}>
                           {trend.participationDelta >= 0 ? '+' : ''}{pct(trend.participationDelta)}
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>Attendance</div>
-                        <div style={{ fontSize: 20, fontWeight: 800, color: trend.attendanceDelta >= 0 ? 'var(--emerald)' : 'var(--rose)' }}>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Attendance</div>
+                        <div style={{ fontSize: 24, fontWeight: 800, color: trend.attendanceDelta >= 0 ? 'var(--emerald)' : 'var(--rose)' }}>
                           {trend.attendanceDelta >= 0 ? '+' : ''}{pct(trend.attendanceDelta)}
                         </div>
                       </div>
                     </div>
-                    <div style={{ marginTop: 10, fontSize: 11 }}>Select "All Months" for trend line chart</div>
+                    <div style={{ marginTop: 20, fontSize: 12, opacity: 0.6 }}>Select "All Months" for trend line chart</div>
                   </div>
                 ) : (
                   <>
-                    <span style={{ fontSize: 28, opacity: 0.3 }}>📈</span>
-                    <span style={{ fontSize: 12 }}>Select "All Months" for trend line</span>
+                    <TrendingUp size={32} opacity={0.3} />
+                    <span style={{ fontSize: 13 }}>Select "All Months" for trend line</span>
                   </>
                 )}
               </div>
@@ -369,15 +363,15 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Geographic Performance Table ───────────────────────────────── */}
       {!dashLoading && (
-        <div style={{ marginBottom: 24 }} role="region" aria-label="Geographic performance table">
-          <div className="section-header">
+        <div style={{ marginBottom: 32 }} role="region" aria-label="Geographic performance table">
+          <div className="section-header" style={{ marginBottom: 20 }}>
             <div>
               <div className="section-title">
+                <MapPin size={16} />
                 {geo?.groupKey === 'block' ? 'Block' : 'District'}-Level Performance
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
                 Sorted worst-first by default · click column headers to resort
               </div>
             </div>
@@ -394,22 +388,22 @@ export default function Dashboard() {
                 <thead>
                   <tr>
                     <th id="col-name" className={sortKey === 'name' ? 'sorted' : ''} onClick={() => handleSort('name')}>
-                      {geo?.groupKey === 'block' ? 'Block' : 'District'}{sortIcon('name')}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{geo?.groupKey === 'block' ? 'Block' : 'District'} {sortIcon('name')}</div>
                     </th>
                     <th id="col-schools" className={sortKey === 'totalSchools' ? 'sorted' : ''} onClick={() => handleSort('totalSchools')}>
-                      Schools{sortIcon('totalSchools')}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>Schools {sortIcon('totalSchools')}</div>
                     </th>
                     <th id="col-participation" className={sortKey === 'participationRate' ? 'sorted' : ''} onClick={() => handleSort('participationRate')}>
-                      Participation{sortIcon('participationRate')}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>Participation {sortIcon('participationRate')}</div>
                     </th>
                     <th id="col-evidence" className={sortKey === 'evidenceRate' ? 'sorted' : ''} onClick={() => handleSort('evidenceRate')}>
-                      Evidence{sortIcon('evidenceRate')}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>Evidence {sortIcon('evidenceRate')}</div>
                     </th>
                     <th id="col-attendance" className={sortKey === 'avgAttendanceRate' ? 'sorted' : ''} onClick={() => handleSort('avgAttendanceRate')}>
-                      Attendance (participants){sortIcon('avgAttendanceRate')}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>Attendance (participants) {sortIcon('avgAttendanceRate')}</div>
                     </th>
                     <th id="col-risk" className={sortKey === 'riskLabel' ? 'sorted' : ''} onClick={() => handleSort('riskLabel')}>
-                      Risk{sortIcon('riskLabel')}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>Risk {sortIcon('riskLabel')}</div>
                     </th>
                     <th id="col-dist">Distribution</th>
                   </tr>
@@ -423,23 +417,23 @@ export default function Dashboard() {
                           <small>{row.participatingSchools} of {row.totalSchools} active</small>
                         </div>
                       </td>
-                      <td className="mono">{row.totalSchools}</td>
+                      <td style={{ fontWeight: 500 }}>{row.totalSchools}</td>
                       <td>
-                        <div className="mono" style={{ fontWeight: 600 }}>{pct(row.participationRate)}</div>
+                        <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>{pct(row.participationRate)}</div>
                         <ProgressBar value={row.participationRate}
                           color={row.participationRate >= 0.75 ? 'var(--emerald)' : row.participationRate >= 0.5 ? 'var(--amber)' : 'var(--rose)'} />
                       </td>
                       <td>
-                        <div className="mono">{pct(row.evidenceRate)}</div>
+                        <div style={{ fontWeight: 500, fontSize: 13, marginBottom: 4 }}>{pct(row.evidenceRate)}</div>
                         <ProgressBar value={row.evidenceRate} color="var(--teal)" />
                       </td>
                       <td>
                         {row.participatingSchools > 0 ? (
                           <>
-                            <div className="mono" style={{ fontWeight: 600 }}>{pct(row.avgAttendanceRate)}</div>
+                            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>{pct(row.avgAttendanceRate)}</div>
                             <ProgressBar value={row.avgAttendanceRate} color={getRiskColor(row.riskLabel)} />
                           </>
-                        ) : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>No sessions</span>}
+                        ) : <span style={{ color: 'var(--text-disabled)', fontSize: 13 }}>No sessions</span>}
                       </td>
                       <td>
                         <RiskBadge status={row.riskLabel} title={row.riskReason} />
@@ -455,14 +449,14 @@ export default function Dashboard() {
       )}
 
       {/* ── Tier 2: Program Reporting Assistant ───────────────────────── */}
-      <div className="program-report-panel" role="region" aria-label="Program Reporting Assistant">
-        <div className="section-header">
+      <div className="card" style={{ marginTop: 32 }} role="region" aria-label="Program Reporting Assistant">
+        <div className="section-header" style={{ marginBottom: 20 }}>
           <div>
-            <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-              <span>✨</span> Program Reporting Assistant
-              <span className="section-badge" style={{ background: 'var(--violet-dim)', color: 'var(--violet)', borderColor: 'rgba(139,92,246,0.15)' }}>Tier 2</span>
+            <div className="section-title">
+              <Sparkles size={18} color="var(--violet)" /> Program Reporting Assistant
+              <span className="section-badge" style={{ background: 'var(--violet-dim)', color: 'var(--violet-light)', borderColor: 'rgba(139,92,246,0.2)' }}>Tier 2</span>
             </div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
               Generate a structured program narrative for the current filter scope
             </div>
           </div>
@@ -471,41 +465,41 @@ export default function Dashboard() {
             onClick={() => { setProgOpen(true); handleGenerateProg(); }}
             disabled={progLoading}>
             {progLoading
-              ? <><span className="spinner" />Generating…</>
-              : '✨ Generate Program Summary'}
+              ? <><span className="spinner" style={{ width: 16, height: 16 }} />Generating…</>
+              : <><Sparkles size={16} /> Generate Program Summary</>}
           </button>
         </div>
 
         {progError && <ErrorState message={progError} />}
 
         {progReport && progOpen && (
-          <div style={{ marginTop: 16 }}>
+          <div style={{ marginTop: 24 }}>
             {!progReport.aiEnabled && (
-              <div className="ai-disabled-note" style={{ marginBottom: 14 }}>
-                ⚠️ {progReport.message}
+              <div className="error-state" style={{ background: 'var(--amber-dim)', color: 'var(--amber)', borderColor: 'rgba(245,158,11,0.2)', marginBottom: 20 }}>
+                <AlertTriangle size={18} /> {progReport.message}
               </div>
             )}
 
             {progReport.narrative && (
-              <div className="narrative-panel">
+              <div className="narrative-panel" style={{ background: 'rgba(139,92,246,0.03)', borderColor: 'rgba(139,92,246,0.15)' }}>
                 <div className="narrative-header">
                   <div className="narrative-label">
-                    ✦ AI-Generated Program Summary
+                    <Sparkles size={16} /> AI-Generated Program Summary
                     <span className="narrative-pill">Rule-based</span>
                   </div>
                 </div>
-                <p className="narrative-text">{progReport.narrative}</p>
+                <p className="narrative-text" style={{ fontStyle: 'italic', fontSize: 16 }}>"{progReport.narrative}"</p>
                 <div className="narrative-footer">
-                  ✓ All figures are sourced from the structured facts object below — no numbers are invented.
+                  <CheckCircle2 size={14} color="var(--emerald)" /> All figures are sourced from the structured facts object below — no numbers are invented.
                 </div>
               </div>
             )}
 
-            <div className="facts-mini-grid">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
               {[
                 { label: 'Scope',            val: progReport.facts.scope },
                 { label: 'Total Schools',    val: fmt(progReport.facts.totalSchools) },
-                { label: 'Participating',    val: `${fmt(progReport.facts.participatingSchools)} · ${pct(progReport.facts.participationRate)}` },
+                { label: 'Participating',    val: `${fmt(progReport.facts.participatingSchools)} (${pct(progReport.facts.participationRate)})` },
                 { label: 'Evidence Rate',    val: pct(progReport.facts.evidenceRate) },
                 { label: 'Attendance Rate',  val: pct(progReport.facts.attendanceRate) },
                 { label: 'Overall Status',   val: <RiskBadge status={progReport.facts.geographyRiskLabel} /> },
@@ -513,11 +507,11 @@ export default function Dashboard() {
                 { label: 'Behind',           val: progReport.facts.riskDistribution.behind },
                 { label: 'At Risk',          val: progReport.facts.riskDistribution.atRisk },
                 { label: 'Critical',         val: progReport.facts.riskDistribution.critical },
-                { label: 'Priority Follow-up', val: progReport.facts.topGap || 'N/A' },
+                { label: 'Priority Gap',     val: progReport.facts.topGap || 'N/A' },
               ].map((m) => (
-                <div key={m.label} className="facts-mini-item">
-                  <div className="facts-mini-label">{m.label}</div>
-                  <div className="facts-mini-val">{m.val}</div>
+                <div key={m.label} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '12px 16px' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-muted)', marginBottom: 6 }}>{m.label}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{m.val}</div>
                 </div>
               ))}
             </div>
