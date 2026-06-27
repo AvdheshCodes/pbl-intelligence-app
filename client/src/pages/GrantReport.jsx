@@ -114,10 +114,24 @@ export default function GrantReport({ onNavigate }) {
         )}
         
         {activeTab === 'archive' && (
-          <div style={{ padding: 40, textAlign: 'center', background: '#fff', border: '1px dashed var(--border)', marginTop: 32 }}>
-            <Archive size={32} color="var(--text-muted)" style={{ margin: '0 auto 16px' }} />
-            <h2 style={{ fontSize: 16, fontWeight: 600 }}>Archive</h2>
-            <p style={{ color: 'var(--text-muted)', marginTop: 8 }}>Past grant reports will be available here.</p>
+          <div style={{ marginTop: 32 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Report Archive</h2>
+            <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>Access historical grant reports for <strong>{grantName}</strong>.</p>
+            
+            <div style={{ display: 'grid', gap: 12 }}>
+              {availMonths.slice().reverse().map(m => (
+                <div key={m} className="panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px' }}>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{MONTH_LABELS[m]} Performance Report</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Status: Finalized</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn btn-secondary" onClick={() => { setSelMonth(m); setActiveTab('grant'); }}>View Report</button>
+                    <button className="btn btn-secondary" onClick={() => alert('Exporting to PDF...')}>Export PDF</button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
