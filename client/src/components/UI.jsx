@@ -80,9 +80,40 @@ export function KpiCard({ label, value, trend, status, progress, id }) {
 // ── Loading / Error ────────────────────────────────────────────────────────────
 export function LoadingState({ message = 'Loading…' }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 64, color: 'var(--text-secondary)' }}>
-      <Loader2 size={24} className="spinner" style={{ marginBottom: 16 }} />
-      <span>{message}</span>
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', padding: '80px 40px', color: 'var(--text-secondary)'
+    }}>
+      {/* Outer pulsing ring */}
+      <div style={{ position: 'relative', width: 96, height: 96, marginBottom: 32 }}>
+        {/* Pulse ring */}
+        <div className="loader-pulse-ring" />
+        {/* Spinning arc */}
+        <div className="loader-spin-ring" />
+        {/* Center brand dot */}
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 36, height: 36, borderRadius: '50%',
+          background: 'var(--brand-green)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#fff', fontFamily: 'var(--font-serif)', fontWeight: 700, fontSize: 14,
+          boxShadow: '0 4px 12px rgba(24,103,81,0.4)'
+        }}>AL</div>
+      </div>
+      {/* Brand name */}
+      <div style={{
+        fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 700,
+        color: 'var(--brand-green)', marginBottom: 10, letterSpacing: '-0.2px'
+      }}>AcademicLedger</div>
+      {/* Message */}
+      <div style={{ fontSize: 13, color: 'var(--text-muted)', letterSpacing: 0.3 }}>{message}</div>
+      {/* Animated dots */}
+      <div style={{ display: 'flex', gap: 6, marginTop: 20 }}>
+        <div className="loader-dot" style={{ animationDelay: '0ms' }} />
+        <div className="loader-dot" style={{ animationDelay: '180ms' }} />
+        <div className="loader-dot" style={{ animationDelay: '360ms' }} />
+      </div>
     </div>
   );
 }

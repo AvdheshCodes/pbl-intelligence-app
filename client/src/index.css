@@ -394,3 +394,38 @@ body {
 .modal-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
 .modal-body { padding: 24px; overflow-y: auto; }
 
+/* ── Loader Animation ──────────────────────────────────────────────────────── */
+@keyframes pulse-ring {
+  0%   { transform: scale(0.8); opacity: 0.6; }
+  50%  { transform: scale(1.15); opacity: 0.15; }
+  100% { transform: scale(0.8); opacity: 0.6; }
+}
+@keyframes bounce-dot {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40%            { transform: translateY(-8px); opacity: 1; }
+}
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
+}
+
+.loader-spin-ring {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: var(--brand-green);
+  border-right-color: var(--brand-green-dim);
+  animation: spinner-rotate 900ms linear infinite;
+}
+.loader-pulse-ring {
+  position: absolute; inset: -8px;
+  border-radius: 50%;
+  border: 2px solid var(--brand-green);
+  opacity: 0.3;
+  animation: pulse-ring 1.8s ease-in-out infinite;
+}
+.loader-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--brand-green);
+  animation: bounce-dot 1.2s ease-in-out infinite;
+}
