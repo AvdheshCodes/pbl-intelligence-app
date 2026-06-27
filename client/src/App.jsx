@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Search, Bell, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Bell, User, Moon, Sun } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import GrantReport from './pages/GrantReport';
 import './index.css';
@@ -13,6 +13,15 @@ const PAGES = [
 
 export default function App() {
   const [page, setPage] = useState('dashboard');
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
 
   return (
     <div className="app-shell">
@@ -38,6 +47,9 @@ export default function App() {
             <input type="text" placeholder="Search data..." />
             <Search />
           </div>
+          <button className="icon-btn" onClick={() => setIsDark(!isDark)}>
+            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <button className="icon-btn"><Bell size={18} /></button>
           <button className="icon-btn"><User size={18} /></button>
         </div>
