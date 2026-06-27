@@ -84,6 +84,7 @@ export default function GrantReport({ onNavigate, searchQuery = '' }) {
           <button className="side-link" style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }} onClick={() => onNavigate('dashboard')}><BarChart2 size={16} /> District Overview</button>
           <button className={`side-link ${activeTab === 'grant' ? 'active' : ''}`} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }} onClick={() => setActiveTab('grant')}><FileText size={16} /> Grant Status</button>
           <button className={`side-link ${activeTab === 'evidence' ? 'active' : ''}`} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }} onClick={() => setActiveTab('evidence')}><ImageIcon size={16} /> Evidence Locker</button>
+          <button className={`side-link ${activeTab === 'actions' ? 'active' : ''}`} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }} onClick={() => setActiveTab('actions')}><CheckCircle2 size={16} /> Recommended Actions</button>
           <button className={`side-link ${activeTab === 'staff' ? 'active' : ''}`} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }} onClick={() => setActiveTab('staff')}><Users size={16} /> Staff Registry</button>
           <button className={`side-link ${activeTab === 'archive' ? 'active' : ''}`} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }} onClick={() => setActiveTab('archive')}><Archive size={16} /> Archive</button>
         </nav>
@@ -98,14 +99,21 @@ export default function GrantReport({ onNavigate, searchQuery = '' }) {
       {/* ── Main Content ───────────────────────────────────────────────────── */}
       <main className="page-content">
         
-        {/* Top Controls (Not in mockup explicitly but needed for app function) */}
-        <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+        {/* Top Controls */}
+        <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
           <select className="filter-select" style={{ width: 300 }} value={selGrant} onChange={(e) => setSelGrant(e.target.value)}>
             {filteredGrants.map((g) => <option key={g.grantId} value={g.grantId}>{g.grantName} ({g.donor})</option>)}
           </select>
           <select className="filter-select" style={{ width: 200 }} value={selMonth} onChange={(e) => setSelMonth(e.target.value)}>
             {availMonths.map((m) => <option key={m} value={m}>{MONTH_LABELS[m]}</option>)}
           </select>
+          <button
+            className="btn btn-secondary"
+            style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
+            onClick={() => window.print()}
+          >
+            <Printer size={14} /> Print Report
+          </button>
         </div>
 
         {factLoading && <LoadingState message="Loading Data..." />}
@@ -116,6 +124,103 @@ export default function GrantReport({ onNavigate, searchQuery = '' }) {
             <Users size={32} color="var(--text-muted)" style={{ margin: '0 auto 16px' }} />
             <h2 style={{ fontSize: 16, fontWeight: 600 }}>Staff Registry</h2>
             <p style={{ color: 'var(--text-muted)', marginTop: 8 }}>This module is currently under development.</p>
+          </div>
+        )}
+
+        {activeTab === 'actions' && f && (
+          <div style={{ marginTop: 32 }}>
+            <div style={{ marginBottom: 24 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 700, fontFamily: 'var(--font-serif)', marginBottom: 6 }}>Recommended Actions</h2>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Auto-generated from risk engine output for <strong>{grantName}</strong> — {MONTH_LABELS[selMonth]}</p>
+            </div>
+
+            {/* Overall risk banner */}
+            <div style={{
+              padding: '16px 20px', borderRadius: 'var(--radius-xs)', marginBottom: 24,
+              background: f.riskStatus === 'On Track' ? 'var(--brand-green-dim)' : f.riskStatus === 'Critical' ? '#fdf2f2' : '#fffbf0',
+              borderLeft: `4px solid ${f.riskStatus === 'On Track' ? 'var(--brand-green)' : f.riskStatus === 'Critical' ? 'var(--status-crit)' : 'var(--status-warn)'}`,
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4, color: 'var(--text-secondary)' }}>Grant Risk Status</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{f.riskStatus} — {grantName}</div>
+            </div>
+
+            {/* Action table */}
+            <div className="table-card">
+              <div className="table-header-dark">Priority Action Register</div>
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Issue Identified</th>
+                    <th>Recommended Action</th>
+                    <th>Metric</th>
+                    <th>Priority</th>
+                    <th>Owner</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    f.pblCompletionRate < 0.75 && {
+                      issue: 'PBL completion below 75% threshold',
+                      action: 'Schedule cluster-level facilitator review; identify non-completing schools for direct outreach',
+                      metric: `Completion: ${pct(f.pblCompletionRate)} (target ≥75%)`,
+                      priority: f.pblCompletionRate < 0.50 ? 'CRITICAL' : 'HIGH',
+                      owner: 'Program Lead',
+                    },
+                    f.evidenceSubmissionRate < 0.75 && {
+                      issue: 'Evidence submission rate below target',
+                      action: 'Send reminder to all conducting schools; provide simplified evidence submission guide',
+                      metric: `Evidence: ${pct(f.evidenceSubmissionRate)} (target ≥75%)`,
+                      priority: f.evidenceSubmissionRate < 0.50 ? 'HIGH' : 'MEDIUM',
+                      owner: 'Field Coordinator',
+                    },
+                    f.attendanceRate < 0.60 && {
+                      issue: 'Student attendance warrants intervention',
+                      action: 'Conduct root-cause analysis at lowest-attendance schools; escalate to district education officer',
+                      metric: `Attendance: ${pct(f.attendanceRate)} (target ≥60%)`,
+                      priority: f.attendanceRate < 0.35 ? 'CRITICAL' : 'HIGH',
+                      owner: 'District Liaison',
+                    },
+                    f.riskStatus === 'On Track' && {
+                      issue: 'All indicators within target range',
+                      action: 'Document best practices from this grant cycle for replication across other districts',
+                      metric: `Risk: ${f.riskStatus}`,
+                      priority: 'LOW',
+                      owner: 'Program Lead',
+                    },
+                  ].filter(Boolean).map((row, i) => (
+                    <tr key={i}>
+                      <td className="mono" style={{ fontWeight: 700 }}>{String(i + 1).padStart(2, '0')}</td>
+                      <td style={{ fontWeight: 600 }}>{row.issue}</td>
+                      <td style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>{row.action}</td>
+                      <td className="mono" style={{ fontSize: 11 }}>{row.metric}</td>
+                      <td>
+                        <span style={{
+                          padding: '2px 8px', borderRadius: 20, fontSize: 10, fontWeight: 700,
+                          background: row.priority === 'CRITICAL' ? '#fdf2f2' : row.priority === 'HIGH' ? '#fffbf0' : row.priority === 'MEDIUM' ? '#f0f9ff' : 'var(--brand-green-dim)',
+                          color: row.priority === 'CRITICAL' ? 'var(--status-crit)' : row.priority === 'HIGH' ? 'var(--status-risk)' : row.priority === 'MEDIUM' ? '#2563eb' : 'var(--brand-green)',
+                        }}>{row.priority}</span>
+                      </td>
+                      <td style={{ color: 'var(--text-muted)', fontSize: 11 }}>{row.owner}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="table-footer">
+                <span>Actions auto-generated from risk engine · {MONTH_LABELS[selMonth]}</span>
+                <button className="btn btn-secondary" style={{ fontSize: 10 }} onClick={() => window.print()}>Export</button>
+              </div>
+            </div>
+
+            {/* Donor-facing note */}
+            <div className="panel" style={{ marginTop: 24, borderLeft: '4px solid var(--brand-green)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--brand-green)', marginBottom: 8 }}>Donor Communication Note</div>
+              <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--text-secondary)' }}>
+                These recommended actions are derived deterministically from the grant performance metrics for <strong>{grantName}</strong>.
+                All figures are sourced from verified school response data for {MONTH_LABELS[selMonth]}.
+                This action register is suitable for inclusion in donor progress reports.
+              </p>
+            </div>
           </div>
         )}
         

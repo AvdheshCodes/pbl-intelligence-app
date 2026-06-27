@@ -12,7 +12,18 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ── Middleware ────────────────────────────────────────────────────────────────
-app.use(cors());
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:4173',
+  'https://pbl-intelligence-client.vercel.app',
+];
+app.use(cors({
+  origin: (origin, cb) => {
+    // allow non-browser requests (curl, Postman, Render health checks)
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    cb(new Error(`CORS: origin ${origin} not allowed`));
+  },
+}));
 app.use(express.json());
 
 // Serve static images from data/raw/images
@@ -27,7 +38,13 @@ app.use('/api/geographies', geographiesRouter);
 app.use('/api/grants', grantsRouter);
 app.use('/api/program-report', programReportRouter);
 
-app.get('/api/health', (_req, res) => res.json({ status: 'ok', aiEnabled: process.env.AI_ENABLED !== 'false' }));
+app.get('/api/health', (_req, res) => res.json({
+  status: 'ok',
+  aiEnabled: process.env.AI_ENABLED !== 'false',
+  timestamp: new Date().toISOString(),
+  uptime: Math.floor(process.uptime()),
+  version: '1.0.0',
+}));
 
 // ── DB + Start ────────────────────────────────────────────────────────────────
 mongoose

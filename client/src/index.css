@@ -429,3 +429,15 @@ body {
   background: var(--brand-green);
   animation: bounce-dot 1.2s ease-in-out infinite;
 }
+
+/* ── Print / PDF Export ────────────────────────────────────────────────────── */
+@media print {
+  .topbar, .sidebar, .filter-bar, .topbar-right,
+  .btn, .icon-btn, .table-footer button { display: none !important; }
+  body { background: #fff !important; color: #000 !important; font-size: 12pt; }
+  .page-container { flex-direction: column; }
+  .page-content { padding: 0; }
+  .panel, .table-card, .kpi-card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
+  .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+  .data-table th, .data-table td { font-size: 10pt; padding: 8px 12px; }
+}

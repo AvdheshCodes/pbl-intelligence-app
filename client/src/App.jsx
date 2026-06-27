@@ -80,7 +80,16 @@ export default function App() {
           </div>
         </div>
       )}
-
+      {!['dashboard','grants','directory','settings'].includes(page) && (
+        <div className="page-container" style={{ alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+          <div style={{ textAlign: 'center', padding: 40 }}>
+            <div style={{ fontSize: 72, fontWeight: 700, color: 'var(--border)', fontFamily: 'var(--font-serif)' }}>404</div>
+            <h2 style={{ fontSize: 24, fontWeight: 600, color: 'var(--text-primary)', marginTop: 16 }}>Page Not Found</h2>
+            <p style={{ color: 'var(--text-muted)', marginTop: 8, marginBottom: 24 }}>The page you are looking for does not exist.</p>
+            <button className="btn btn-primary" onClick={() => setPage('dashboard')}>Go to Dashboard</button>
+          </div>
+        </div>
+      )}
       <footer style={{ padding: '24px', textAlign: 'center', fontSize: 10, color: 'var(--text-muted)', background: 'var(--bg-sidebar)', borderTop: '1px solid var(--border)', marginTop: 'auto' }}>
         © 2024 AcademicLedger Management System. Confidential Administrator View.
       </footer>
