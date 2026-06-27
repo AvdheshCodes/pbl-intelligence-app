@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Loader2, FileText, CheckCircle2 } from 'lucide-react';
 import { fetchDashboard, fetchFilters, fetchGeographies } from '../api/dashboard';
 import { generateProgramReport } from '../api/grants';
 import {
@@ -30,8 +30,11 @@ export default function Dashboard() {
   const [geoLoading, setGeoLoading]   = useState(true);
   const [error, setError]             = useState(null);
 
-  // Pagination mock state for the table (just UI)
-  const [page, setPage] = useState(1);
+  // Report Generation State
+  const [progReport, setProgReport]     = useState(null);
+  const [progLoading, setProgLoading]   = useState(false);
+  const [progError, setProgError]       = useState(null);
+  const [progOpen, setProgOpen]         = useState(false);
 
   useEffect(() => {
     fetchFilters(filters.district !== 'All' ? filters.district : '')
@@ -41,7 +44,7 @@ export default function Dashboard() {
 
   const params = buildParams(filters);
   useEffect(() => {
-    setDashLoading(true); setError(null); setGeoLoading(true);
+    setDashLoading(true); setError(null); setGeoLoading(true); setProgReport(null);
     fetchDashboard(params)
       .then(setDash)
       .catch((e) => setError(e.message))
@@ -61,14 +64,31 @@ export default function Dashboard() {
     });
   }
 
+  async function handleGenerateReport() {
+    setProgOpen(true);
+    setProgLoading(true);
+    setProgError(null);
+    try {
+      const r = await generateProgramReport({
+        month:    filters.month   !== 'All' ? filters.month   : 'All',
+        district: filters.district !== 'All' ? filters.district : 'All',
+        block:    filters.block    !== 'All' ? filters.block    : 'All',
+      });
+      setProgReport(r);
+    } catch (e) {
+      setProgError(e.message);
+    } finally {
+      setProgLoading(false);
+    }
+  }
+
   const kpis = dash?.kpis;
   const trend = dash?.trend;
   const rows = geo?.rows || [];
 
-  // Adapt the trend series to a bar chart matching the mockup
   const barData = trend?.type === 'series'
     ? trend.data.map((d) => ({
-        month: d.month.split('-')[1], // Just "07", "08" etc, or map to JAN, FEB
+        month: d.month.split('-')[1],
         val: d.participationRate,
         isCurrent: d.month === filters.month
       }))
@@ -107,7 +127,9 @@ export default function Dashboard() {
             </select>
           </div>
           <div className="filter-actions">
-            <button className="btn btn-primary" onClick={() => alert('Report generated.')}>Generate Report</button>
+            <button className="btn btn-primary" onClick={handleGenerateReport} disabled={progLoading}>
+              {progLoading ? <Loader2 size={14} className="spinner" /> : 'Generate Report'}
+            </button>
           </div>
         </div>
 
@@ -204,25 +226,72 @@ export default function Dashboard() {
 
               <div className="panel">
                 <div className="panel-header">Program Notices</div>
-                
                 <div className="notice-item">
                   <div className="notice-label">Upcoming Deadline</div>
                   <div className="notice-text">FY25 Q3 Compliance reports due in 5 days.</div>
                 </div>
-
                 <div className="notice-item warn">
                   <div className="notice-label">Participation Alert</div>
                   <div className="notice-text">Average participation dipped below 70% threshold this cycle.</div>
                 </div>
-
                 <div className="notice-item crit">
                   <div className="notice-label">Audit Notice</div>
                   <div className="notice-text">{kpis.riskDistribution?.critical || 0} schools marked critical; scheduled for priority review.</div>
                 </div>
-                
                 <button className="btn btn-secondary" style={{ width: '100%', marginTop: 24 }}>View All Notifications</button>
               </div>
             </div>
+
+            {/* Program Report Output Area */}
+            {progOpen && (
+              <div className="panel" style={{ marginTop: 32, borderTop: '4px solid var(--brand-green)' }} id="report-output">
+                <div className="panel-header" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <FileText color="var(--brand-green)" /> Generated Program Report
+                </div>
+                
+                {progLoading ? (
+                  <LoadingState message="Synthesizing program intelligence..." />
+                ) : progError ? (
+                  <ErrorState message={progError} />
+                ) : progReport ? (
+                  <div>
+                    {!progReport.aiEnabled && (
+                      <div className="notice-item warn" style={{ marginBottom: 24 }}>
+                        <div className="notice-label">AI Generation Disabled</div>
+                        <div className="notice-text">{progReport.message}</div>
+                      </div>
+                    )}
+
+                    {progReport.narrative && (
+                      <div style={{ padding: 24, background: '#f5f3ee', borderRadius: 'var(--radius-xs)', marginBottom: 24, borderLeft: '4px solid var(--brand-green)' }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--brand-green)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <Sparkles size={14} /> AI-Generated Narrative (Rule-Based)
+                        </div>
+                        <p style={{ fontSize: 15, lineHeight: 1.8, fontStyle: 'italic', color: 'var(--text-primary)' }}>
+                          "{progReport.narrative}"
+                        </p>
+                      </div>
+                    )}
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+                      {[
+                        { label: 'Scope',            val: progReport.facts.scope },
+                        { label: 'Total Schools',    val: fmt(progReport.facts.totalSchools) },
+                        { label: 'Participating',    val: `${fmt(progReport.facts.participatingSchools)} (${pct(progReport.facts.participationRate)})` },
+                        { label: 'Evidence Rate',    val: pct(progReport.facts.evidenceRate) },
+                        { label: 'Attendance Rate',  val: pct(progReport.facts.attendanceRate) },
+                        { label: 'Overall Risk',     val: <RiskBadge status={progReport.facts.geographyRiskLabel} /> },
+                      ].map((m) => (
+                        <div key={m.label} style={{ border: '1px solid var(--border)', padding: '12px 16px', borderRadius: 'var(--radius-xs)' }}>
+                          <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-secondary)', marginBottom: 8 }}>{m.label}</div>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{m.val}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            )}
           </>
         )}
       </div>
