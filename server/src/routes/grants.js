@@ -27,7 +27,8 @@ async function buildGrantFacts(grantId, month) {
   const [perf, financeLines, evidence, allPerf] = await Promise.all([
     GrantPerformance.findOne({ grantId, reportingMonth: month }).lean(),
     GrantFinance.find({ grantId, reportingMonth: month }).lean(),
-    EvidenceRecord.find({ grantId, reportingMonth: month }).lean(),
+    // For evidence, we fetch ALL evidence for the grant to populate the gallery fully
+    EvidenceRecord.find({ grantId }).lean(),
     // For trend: fetch all months for this grant, sorted
     GrantPerformance.find({ grantId }).sort({ reportingMonth: 1 }).lean(),
   ]);
