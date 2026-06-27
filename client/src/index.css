@@ -338,3 +338,37 @@ body {
 .mono { font-family: monospace; }
 .text-right { text-align: right; }
 .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+/* ── Modal ─────────────────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 24px;
+}
+.modal-container {
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  width: 100%; max-width: 800px; max-height: 90vh;
+  display: flex; flex-direction: column; overflow: hidden;
+  animation: modal-fade-in var(--t-fast) var(--ease);
+}
+@keyframes modal-fade-in {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-header {
+  padding: 16px 24px; background: var(--brand-green); color: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-family: var(--font-serif); font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.modal-actions { display: flex; gap: 8px; }
+.modal-btn {
+  background: transparent; border: none; color: rgba(255,255,255,0.8);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  padding: 4px; border-radius: var(--radius-xs); transition: all var(--t-fast);
+}
+.modal-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.modal-body { padding: 24px; overflow-y: auto; }
+

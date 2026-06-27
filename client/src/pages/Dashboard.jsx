@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { ChevronLeft, ChevronRight, Sparkles, Loader2, FileText, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Loader2, FileText, CheckCircle2, X, Minus } from 'lucide-react';
 import { fetchDashboard, fetchFilters, fetchGeographies } from '../api/dashboard';
 import { generateProgramReport } from '../api/grants';
 import {
@@ -35,6 +35,7 @@ export default function Dashboard() {
   const [progLoading, setProgLoading]   = useState(false);
   const [progError, setProgError]       = useState(null);
   const [progOpen, setProgOpen]         = useState(false);
+  const [progModalOpen, setProgModalOpen] = useState(false);
 
   useEffect(() => {
     fetchFilters(filters.district !== 'All' ? filters.district : '')
@@ -66,6 +67,7 @@ export default function Dashboard() {
 
   async function handleGenerateReport() {
     setProgOpen(true);
+    setProgModalOpen(true);
     setProgLoading(true);
     setProgError(null);
     try {
@@ -247,6 +249,7 @@ export default function Dashboard() {
               <div className="panel" style={{ marginTop: 32, borderTop: '4px solid var(--brand-green)' }} id="report-output">
                 <div className="panel-header" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <FileText color="var(--brand-green)" /> Generated Program Report
+                  <button className="btn btn-secondary" style={{ marginLeft: 'auto', fontSize: 10, padding: '4px 8px' }} onClick={() => setProgModalOpen(true)}>Open in Modal</button>
                 </div>
                 
                 {progLoading ? (
@@ -290,6 +293,55 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ) : null}
+              </div>
+            )}
+            
+            {/* Modal Overlay */}
+            {progModalOpen && (
+              <div className="modal-overlay" onClick={() => setProgModalOpen(false)}>
+                <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+                  <div className="modal-header">
+                    <div className="modal-title"><FileText size={18} /> Program Report</div>
+                    <div className="modal-actions">
+                      <button className="modal-btn" onClick={() => setProgModalOpen(false)} title="Minimize"><Minus size={16} /></button>
+                      <button className="modal-btn" onClick={() => setProgModalOpen(false)} title="Close"><X size={16} /></button>
+                    </div>
+                  </div>
+                  <div className="modal-body">
+                    {progLoading ? (
+                      <LoadingState message="Synthesizing program intelligence..." />
+                    ) : progError ? (
+                      <ErrorState message={progError} />
+                    ) : progReport ? (
+                      <div>
+                        {progReport.narrative && (
+                          <div style={{ padding: 24, background: '#f5f3ee', borderRadius: 'var(--radius-xs)', marginBottom: 24, borderLeft: '4px solid var(--brand-green)' }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--brand-green)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <Sparkles size={14} /> AI-Generated Narrative
+                            </div>
+                            <p style={{ fontSize: 15, lineHeight: 1.8, fontStyle: 'italic', color: 'var(--text-primary)' }}>
+                              "{progReport.narrative}"
+                            </p>
+                          </div>
+                        )}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+                          {[
+                            { label: 'Scope',            val: progReport.facts.scope },
+                            { label: 'Total Schools',    val: fmt(progReport.facts.totalSchools) },
+                            { label: 'Participating',    val: `${fmt(progReport.facts.participatingSchools)} (${pct(progReport.facts.participationRate)})` },
+                            { label: 'Evidence Rate',    val: pct(progReport.facts.evidenceRate) },
+                            { label: 'Attendance Rate',  val: pct(progReport.facts.attendanceRate) },
+                          ].map((m) => (
+                            <div key={m.label} style={{ border: '1px solid var(--border)', padding: '12px 16px', borderRadius: 'var(--radius-xs)' }}>
+                              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-secondary)', marginBottom: 8 }}>{m.label}</div>
+                              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{m.val}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
               </div>
             )}
           </>
