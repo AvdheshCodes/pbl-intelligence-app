@@ -139,14 +139,33 @@ export default function Dashboard() {
           <>
             <div className="kpi-grid">
               <KpiCard 
-                label="Student Enrollment" 
-                value={fmt(kpis.totalEnrollment)} 
-                trend={trend?.type !== 'series' ? trend?.participationDelta : null}
+                label="Total Schools" 
+                value={fmt(kpis.totalSchools)} 
+                sub={`Participating: ${fmt(kpis.participatingSchools)}`}
               />
               <KpiCard 
                 label="Program Utilization" 
                 value={pct(kpis.participationRate)} 
+                trend={trend?.type !== 'series' ? trend?.participationDelta : null}
                 progress={kpis.participationRate}
+              />
+              <KpiCard 
+                label="Evidence Submitted" 
+                value={pct(kpis.evidenceRate)} 
+                sub={`${fmt(kpis.evidenceSubmissions)} submissions`}
+              />
+              <KpiCard 
+                label="Student Enrollment" 
+                value={fmt(kpis.totalEnrollment)} 
+              />
+              <KpiCard 
+                label="Total Attendance" 
+                value={fmt(kpis.totalAttendance)} 
+              />
+              <KpiCard 
+                label="Attendance Rate" 
+                value={pct(kpis.attendanceRateAmongParticipants)} 
+                trend={trend?.type !== 'series' ? trend?.attendanceDelta : null}
               />
               <KpiCard 
                 label="Schools On Track" 
