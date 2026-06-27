@@ -44,7 +44,24 @@ export default function App() {
       </header>
 
       {/* Pages render their own layout containers (sidebar or full-width) */}
-      {page === 'dashboard' ? <Dashboard /> : <GrantReport onNavigate={setPage} />}
+      {page === 'dashboard' && <Dashboard />}
+      {page === 'grants' && <GrantReport onNavigate={setPage} />}
+      {page === 'directory' && (
+        <div className="page-container" style={{ alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+          <div style={{ textAlign: 'center', padding: 40 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 600, color: 'var(--text-primary)' }}>Directory</h2>
+            <p style={{ color: 'var(--text-muted)', marginTop: 8 }}>Global staff and school directory is under development.</p>
+          </div>
+        </div>
+      )}
+      {page === 'settings' && (
+        <div className="page-container" style={{ alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+          <div style={{ textAlign: 'center', padding: 40 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 600, color: 'var(--text-primary)' }}>System Settings</h2>
+            <p style={{ color: 'var(--text-muted)', marginTop: 8 }}>Admin configuration module is under development.</p>
+          </div>
+        </div>
+      )}
 
       <footer style={{ padding: '24px', textAlign: 'center', fontSize: 10, color: 'var(--text-muted)', background: 'var(--bg-sidebar)', borderTop: '1px solid var(--border)', marginTop: 'auto' }}>
         © 2024 AcademicLedger Management System. Confidential Administrator View.
