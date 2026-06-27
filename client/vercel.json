@@ -1,6 +1,3 @@
-# Vercel deployment config
-# This tells Vercel: "when someone requests /api/*, proxy it to the backend URL"
-
 {
   "rewrites": [
     {
