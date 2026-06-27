@@ -21,7 +21,7 @@ function buildParams(f) {
 
 const INITIAL_FILTERS = { month: 'All', district: 'All', block: 'All', grade: [], subject: [] };
 
-export default function Dashboard() {
+export default function Dashboard({ searchQuery = '' }) {
   const [filters, setFilters]         = useState(INITIAL_FILTERS);
   const [filterOpts, setFilterOpts]   = useState({ months: [], districts: [], blocks: [], grades: ['6','7','8'], subjects: ['Math','Science'] });
   const [dash, setDash]               = useState(null);
@@ -95,6 +95,13 @@ export default function Dashboard() {
         isCurrent: d.month === filters.month
       }))
     : [];
+
+  const filteredGeos = geo?.rows?.filter(item => 
+    !searchQuery || 
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
+  const getRiskClass = (s) => s?.toLowerCase() || 'neutral';
 
   return (
     <div className="page-container">
@@ -189,17 +196,17 @@ export default function Dashboard() {
                     <th>{geo?.groupKey === 'block' ? 'Block Name' : 'District Name'}</th>
                     <th>Schools</th>
                     <th>Participation Rate</th>
-                    <th>Compliance Score</th>
+                    <th>Evidence Rate</th>
                     <th>Performance Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {geoLoading ? (
                     <tr><td colSpan="5" style={{ textAlign: 'center', padding: 32 }}><LoadingState message="Loading..." /></td></tr>
-                  ) : rows.length === 0 ? (
+                  ) : filteredGeos.length === 0 ? (
                     <tr><td colSpan="5" style={{ textAlign: 'center', padding: 32 }}>No records found.</td></tr>
                   ) : (
-                    rows.map((row) => (
+                    filteredGeos.map((row) => (
                       <tr key={row.name}>
                         <td>{row.name}</td>
                         <td>{row.totalSchools}</td>

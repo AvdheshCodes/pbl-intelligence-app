@@ -14,6 +14,7 @@ const PAGES = [
 export default function App() {
   const [page, setPage] = useState('dashboard');
   const [isDark, setIsDark] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (isDark) {
@@ -44,7 +45,12 @@ export default function App() {
 
         <div className="topbar-right">
           <div className="search-bar">
-            <input type="text" placeholder="Search data..." />
+            <input 
+              type="text" 
+              placeholder="Search data..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
             <Search />
           </div>
           <button className="icon-btn" onClick={() => setIsDark(!isDark)}>
@@ -56,8 +62,8 @@ export default function App() {
       </header>
 
       {/* Pages render their own layout containers (sidebar or full-width) */}
-      {page === 'dashboard' && <Dashboard />}
-      {page === 'grants' && <GrantReport onNavigate={setPage} />}
+      {page === 'dashboard' && <Dashboard searchQuery={searchQuery} />}
+      {page === 'grants' && <GrantReport onNavigate={setPage} searchQuery={searchQuery} />}
       {page === 'directory' && (
         <div className="page-container" style={{ alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
           <div style={{ textAlign: 'center', padding: 40 }}>

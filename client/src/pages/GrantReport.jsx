@@ -9,7 +9,7 @@ import { LoadingState, ErrorState, pct, fmt } from '../components/UI';
 const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 const MONTH_LABELS = { '2025-07': 'July 2025', '2025-08': 'August 2025', '2025-09': 'September 2025' };
 
-export default function GrantReport({ onNavigate }) {
+export default function GrantReport({ onNavigate, searchQuery = '' }) {
   const [activeTab, setActiveTab] = useState('evidence');
   const [grants, setGrants] = useState([]);
   const [selGrant, setSelGrant] = useState('');
@@ -65,6 +65,12 @@ export default function GrantReport({ onNavigate }) {
   const f = factData?.facts;
   const grantName = grants.find(g => g.grantId === selGrant)?.grantName || 'Loading...';
 
+  const filteredGrants = grants.filter(g => 
+    !searchQuery || 
+    g.grantName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    g.donor.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="page-container">
       {/* ── Sidebar ──────────────────────────────────────────────────────── */}
@@ -95,7 +101,7 @@ export default function GrantReport({ onNavigate }) {
         {/* Top Controls (Not in mockup explicitly but needed for app function) */}
         <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
           <select className="filter-select" style={{ width: 300 }} value={selGrant} onChange={(e) => setSelGrant(e.target.value)}>
-            {grants.map((g) => <option key={g.grantId} value={g.grantId}>{g.grantName} ({g.donor})</option>)}
+            {filteredGrants.map((g) => <option key={g.grantId} value={g.grantId}>{g.grantName} ({g.donor})</option>)}
           </select>
           <select className="filter-select" style={{ width: 200 }} value={selMonth} onChange={(e) => setSelMonth(e.target.value)}>
             {availMonths.map((m) => <option key={m} value={m}>{MONTH_LABELS[m]}</option>)}
