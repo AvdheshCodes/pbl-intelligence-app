@@ -9,7 +9,8 @@ import { LoadingState, ErrorState, pct, fmt } from '../components/UI';
 const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 const MONTH_LABELS = { '2025-07': 'July 2025', '2025-08': 'August 2025', '2025-09': 'September 2025' };
 
-export default function GrantReport() {
+export default function GrantReport({ onNavigate }) {
+  const [activeTab, setActiveTab] = useState('evidence');
   const [grants, setGrants] = useState([]);
   const [selGrant, setSelGrant] = useState('');
   const [selMonth, setSelMonth] = useState('');
@@ -74,11 +75,11 @@ export default function GrantReport() {
         </div>
         
         <nav className="sidebar-nav">
-          <div className="side-link"><BarChart2 size={16} /> District Overview</div>
-          <div className="side-link"><FileText size={16} /> Grant Status</div>
-          <div className="side-link active"><ImageIcon size={16} /> Evidence Locker</div>
-          <div className="side-link"><Users size={16} /> Staff Registry</div>
-          <div className="side-link"><Archive size={16} /> Archive</div>
+          <button className="side-link" style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }} onClick={() => onNavigate('dashboard')}><BarChart2 size={16} /> District Overview</button>
+          <button className={`side-link ${activeTab === 'grant' ? 'active' : ''}`} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }} onClick={() => setActiveTab('grant')}><FileText size={16} /> Grant Status</button>
+          <button className={`side-link ${activeTab === 'evidence' ? 'active' : ''}`} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }} onClick={() => setActiveTab('evidence')}><ImageIcon size={16} /> Evidence Locker</button>
+          <button className={`side-link ${activeTab === 'staff' ? 'active' : ''}`} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }} onClick={() => setActiveTab('staff')}><Users size={16} /> Staff Registry</button>
+          <button className={`side-link ${activeTab === 'archive' ? 'active' : ''}`} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }} onClick={() => setActiveTab('archive')}><Archive size={16} /> Archive</button>
         </nav>
 
         <div className="sidebar-bottom">
@@ -101,10 +102,26 @@ export default function GrantReport() {
           </select>
         </div>
 
-        {factLoading && <LoadingState message="Loading Grant Profile..." />}
+        {factLoading && <LoadingState message="Loading Data..." />}
         {factError && <ErrorState message={factError} />}
 
-        {f && (
+        {activeTab === 'staff' && (
+          <div style={{ padding: 40, textAlign: 'center', background: '#fff', border: '1px dashed var(--border)', marginTop: 32 }}>
+            <Users size={32} color="var(--text-muted)" style={{ margin: '0 auto 16px' }} />
+            <h2 style={{ fontSize: 16, fontWeight: 600 }}>Staff Registry</h2>
+            <p style={{ color: 'var(--text-muted)', marginTop: 8 }}>This module is currently under development.</p>
+          </div>
+        )}
+        
+        {activeTab === 'archive' && (
+          <div style={{ padding: 40, textAlign: 'center', background: '#fff', border: '1px dashed var(--border)', marginTop: 32 }}>
+            <Archive size={32} color="var(--text-muted)" style={{ margin: '0 auto 16px' }} />
+            <h2 style={{ fontSize: 16, fontWeight: 600 }}>Archive</h2>
+            <p style={{ color: 'var(--text-muted)', marginTop: 8 }}>Past grant reports will be available here.</p>
+          </div>
+        )}
+
+        {f && (activeTab === 'grant' || activeTab === 'evidence') && (
           <>
             <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
@@ -123,23 +140,27 @@ export default function GrantReport() {
             <div className="grid-2">
               {/* Left Column */}
               <div>
-                <div className="flex-between" style={{ marginBottom: 16 }}>
-                  <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>Classroom Evidence Board</h2>
-                  <button className="btn btn-secondary"><Upload size={14} /> Upload Document</button>
-                </div>
-                
-                <div className="evidence-board" style={{ marginBottom: 32 }}>
-                  {f.evidenceRefs?.slice(0, 6).map((ev) => (
-                    <div key={ev.recordId} className="polaroid">
-                      <img src={`${BASE}/${ev.relativePath}`} alt={ev.title} loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} />
-                      <div className="polaroid-caption">{ev.title}</div>
-                      <div className="polaroid-date">{ev.recordId.split('_').pop() || '20 OCT 2025'}</div>
+                {activeTab === 'evidence' && (
+                  <>
+                    <div className="flex-between" style={{ marginBottom: 16 }}>
+                      <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>Classroom Evidence Board</h2>
+                      <button className="btn btn-secondary"><Upload size={14} /> Upload Document</button>
                     </div>
-                  ))}
-                  {(!f.evidenceRefs || f.evidenceRefs.length === 0) && (
-                    <div style={{ gridColumn: '1 / -1', padding: 40, textAlign: 'center', background: '#fff', border: '1px dashed var(--border)' }}>No evidence uploaded for this period.</div>
-                  )}
-                </div>
+                    
+                    <div className="evidence-board" style={{ marginBottom: 32 }}>
+                      {f.evidenceRefs?.slice(0, 6).map((ev) => (
+                        <div key={ev.recordId} className="polaroid">
+                          <img src={`${BASE}/${ev.relativePath}`} alt={ev.title} loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} />
+                          <div className="polaroid-caption">{ev.title}</div>
+                          <div className="polaroid-date">{ev.recordId.split('_').pop() || '20 OCT 2025'}</div>
+                        </div>
+                      ))}
+                      {(!f.evidenceRefs || f.evidenceRefs.length === 0) && (
+                        <div style={{ gridColumn: '1 / -1', padding: 40, textAlign: 'center', background: '#fff', border: '1px dashed var(--border)' }}>No evidence uploaded for this period.</div>
+                      )}
+                    </div>
+                  </>
+                )}
 
                 <div className="panel" style={{ padding: 32 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-secondary)', marginBottom: 12 }}>Narrative Implementation Summary</div>

@@ -44,7 +44,7 @@ export default function App() {
       </header>
 
       {/* Pages render their own layout containers (sidebar or full-width) */}
-      {page === 'dashboard' ? <Dashboard /> : <GrantReport />}
+      {page === 'dashboard' ? <Dashboard /> : <GrantReport onNavigate={setPage} />}
 
       <footer style={{ padding: '24px', textAlign: 'center', fontSize: 10, color: 'var(--text-muted)', background: 'var(--bg-sidebar)', borderTop: '1px solid var(--border)', marginTop: 'auto' }}>
         © 2024 AcademicLedger Management System. Confidential Administrator View.
